@@ -1,0 +1,111 @@
+{% for item in dados %}
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<div class="card mb-5 shadow-sm">
+    <div class="card-header bg-dark text-white d-flex justify-content-between">
+        <h2 class="h4 mb-0">🏢 {{ item.empresa.nome }}</h2>
+        <span class="badge bg-primary">Dias Úteis Restantes: {{ item.meta_global.dias_uteis_restantes }}</span>
+    </div>
+    
+    <div class="card-body">
+        <h5 class="text-secondary border-bottom pb-2">📊 Desempenho Coletivo (Soma da Equipe)</h5>
+        <div class="row text-center mb-4">
+            <div class="col-md-4">
+                <div class="p-2 border rounded bg-light">
+                    <small>Falta para <b>BRONZE</b></small><br>
+                    <strong class="text-danger">R$ {{ item.meta_global.falta_para_bronze|floatformat:2 }}</strong>
+                    <div class="text-muted" style="font-size: 0.8rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_bronze|floatformat:2 }}/dia</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-2 border rounded bg-light">
+                    <small>Falta para <b>PRATA</b></small><br>
+                    <strong class="text-warning">R$ {{ item.meta_global.falta_para_prata|floatformat:2 }}</strong>
+                    <div class="text-muted" style="font-size: 0.8rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_prata|floatformat:2 }}/dia</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-2 border rounded bg-light">
+                    <small>Falta para <b>OURO</b></small><br>
+                    <strong class="text-success">R$ {{ item.meta_global.falta_para_ouro|floatformat:2 }}</strong>
+                    <div class="text-muted" style="font-size: 0.8rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_ouro|floatformat:2 }}/dia</div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="text-secondary border-bottom pb-2">🏆 Performance Individual (Top 5)</h5>
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Pos.</th>
+                        <th>Analista</th>
+                        <th>Total Arrecadado</th>
+                        <th class="text-danger">Falta Bronze</th>
+                        <th class="text-warning">Falta Prata</th>
+                        <th class="text-success">Falta Ouro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for analista in item.ranking %}
+                    <tr>
+                        <td><strong>{{ forloop.counter }}º</strong></td>
+                        <td>{{ analista.nome }}</td>
+                        <td>R$ {{ analista.total_mes|floatformat:2 }}</td>
+                        <td class="small text-danger">R$ {{ analista.falta_bronze|floatformat:2 }}</td>
+                        <td class="small text-warning">R$ {{ analista.falta_prata|floatformat:2 }}</td>
+                        <td class="small text-success">R$ {{ analista.falta_ouro|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<h3 class="h5 mb-3">📋 Performance Geral dos Analistas</h3>
+<div class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Pos.</th>
+                <th>Analista</th>
+                <th>Total Arrecadado</th>
+                <th class="text-danger">Falta Bronze</th>
+                <th class="text-warning">Falta Prata</th>
+                <th class="text-success">Falta Ouro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for analista in item.analistas %}
+            <tr {% if forloop.counter <= 5 %}class="table-light"{% endif %}>
+                <td>
+                    {% if forloop.counter == 1 %}🥇 
+                    {% elif forloop.counter == 2 %}🥈 
+                    {% elif forloop.counter == 3 %}🥉 
+                    {% else %}{{ forloop.counter }}º{% endif %}
+                </td>
+                <td>
+                    <strong>{{ analista.nome }}</strong>
+                    {% if not analista.total_mes %}
+                        <span class="badge bg-secondary ms-1">Sem lançamentos</span>
+                    {% endif %}
+                </td>
+                <td>
+                    R$ {{ analista.total_mes|default:0|floatformat:2 }}
+                </td>
+                <td class="small text-danger">R$ {{ analista.falta_bronze|floatformat:2 }}</td>
+                <td class="small text-warning">R$ {{ analista.falta_prata|floatformat:2 }}</td>
+                <td class="small text-success">R$ {{ analista.falta_ouro|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">Nenhum analista cadastrado para esta empresa.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endfor %}
