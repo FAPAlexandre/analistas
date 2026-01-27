@@ -1,111 +1,146 @@
-{% for item in dados %}
+<!DOCTYPE html>
+<html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Metas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* CORES PERSONALIZADAS DE METAIS */
+        .bg-bronze { background-color: #cd7f32 !important; color: white !important; }
+        .bg-prata  { background-color: #c0c0c0 !important; color: #333 !important; }
+        .bg-ouro   { background-color: #ffd700 !important; color: #333 !important; }
+
+        /* CORES SUAVES PARA A TABELA */
+        .table-bronze { background-color: #dfb285 !important; color: #3e2711 !important; }
+        .table-prata  { background-color: #e8e8e8 !important; color: #333 !important; }
+        .table-ouro   { background-color: #fff3b0 !important; color: #534500 !important; }
+
+        .meta-text { font-size: 0.75rem; font-weight: bold; display: block; margin-top: 2px; }
+        .card-meta { transition: transform 0.2s; }
+        .card-meta:hover { transform: scale(1.02); }
+    </style>
 </head>
+<body class="bg-light">
+    <div class="container py-4">
+        <h1 class="text-center mb-5">🚀 Dashboard de Performance</h1>
 
-<div class="card mb-5 shadow-sm">
-    <div class="card-header bg-dark text-white d-flex justify-content-between">
-        <h2 class="h4 mb-0">🏢 {{ item.empresa.nome }}</h2>
-        <span class="badge bg-primary">Dias Úteis Restantes: {{ item.meta_global.dias_uteis_restantes }}</span>
-    </div>
-    
-    <div class="card-body">
-        <h5 class="text-secondary border-bottom pb-2">📊 Desempenho Coletivo (Soma da Equipe)</h5>
-        <div class="row text-center mb-4">
-            <div class="col-md-4">
-                <div class="p-2 border rounded bg-light">
-                    <small>Falta para <b>BRONZE</b></small><br>
-                    <strong class="text-danger">R$ {{ item.meta_global.falta_para_bronze|floatformat:2 }}</strong>
-                    <div class="text-muted" style="font-size: 0.8rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_bronze|floatformat:2 }}/dia</div>
-                </div>
+        {% for item in dados %}
+        <div class="card mb-5 shadow-sm border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0">🏢 {{ item.empresa.nome }}</h2>
+                <span class="badge bg-primary fs-6">📅 Dias Úteis Restantes: {{ item.meta_global.dias_uteis_restantes }}</span>
             </div>
-            <div class="col-md-4">
-                <div class="p-2 border rounded bg-light">
-                    <small>Falta para <b>PRATA</b></small><br>
-                    <strong class="text-warning">R$ {{ item.meta_global.falta_para_prata|floatformat:2 }}</strong>
-                    <div class="text-muted" style="font-size: 0.8rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_prata|floatformat:2 }}/dia</div>
+            
+            <div class="card-body">
+                <h5 class="text-secondary border-bottom pb-2 mb-3">📊 Desempenho Coletivo (Soma da Equipe)</h5>
+                <div class="row g-3 text-center mb-4">
+                    
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded shadow-sm h-100 
+                            {% if item.meta_global.total_arrecadado_equipe >= item.meta_global.ouro_global %} bg-ouro
+                            {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.prata_global %} bg-prata
+                            {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.bronze_global %} bg-bronze
+                            {% else %} bg-primary text-white {% endif %}">
+                            
+                            <small class="opacity-75">Total Arrecadado Equipe</small><br>
+                            <span class="h4 fw-bold">R$ {{ item.meta_global.total_arrecadado_equipe|floatformat:2 }}</span>
+
+                            <div class="mt-2 fw-bold" style="font-size: 0.85rem;">
+                                {% if item.meta_global.total_arrecadado_equipe >= item.meta_global.ouro_global %}
+                                    👑 EQUIPE OURO!
+                                {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.prata_global %}
+                                    🥈 EQUIPE PRATA!
+                                {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.bronze_global %}
+                                    🥉 EQUIPE BRONZE!
+                                {% else %}
+                                    🚀 EM BUSCA DA META
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded bg-white shadow-sm h-100">
+                            <small class="text-muted">Falta para <b>BRONZE</b></small><br>
+                            <strong style="color: #cd7f32;" class="d-block">R$ {{ item.meta_global.falta_para_bronze|floatformat:2 }}</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_bronze|floatformat:2 }}/dia</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded bg-white shadow-sm h-100">
+                            <small class="text-muted">Falta para <b>PRATA</b></small><br>
+                            <strong style="color: #8e8e8e;" class="d-block">R$ {{ item.meta_global.falta_para_prata|floatformat:2 }}</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_prata|floatformat:2 }}/dia</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded bg-white shadow-sm h-100">
+                            <small class="text-muted">Falta para <b>OURO</b></small><br>
+                            <strong style="color: #d4af37;" class="d-block">R$ {{ item.meta_global.falta_para_ouro|floatformat:2 }}</strong>
+                            <small class="text-muted" style="font-size: 0.75rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_ouro|floatformat:2 }}/dia</small>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-2 border rounded bg-light">
-                    <small>Falta para <b>OURO</b></small><br>
-                    <strong class="text-success">R$ {{ item.meta_global.falta_para_ouro|floatformat:2 }}</strong>
-                    <div class="text-muted" style="font-size: 0.8rem;">Ritmo: R$ {{ item.meta_global.ritmo_diario_ouro|floatformat:2 }}/dia</div>
+
+                <h5 class="text-secondary border-bottom pb-2 mb-3">📋 Performance de todos os Analistas</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle border text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 80px;">Pos.</th>
+                                <th class="text-start">Analista</th>
+                                <th>Total Arrecadado</th>
+                                <th style="color: #cd7f32;">Falta Bronze</th>
+                                <th style="color: #8e8e8e;">Falta Prata</th>
+                                <th style="color: #d4af37;">Falta Ouro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for analista in item.analistas %}
+                            <tr>
+                                <td>
+                                    {% if forloop.counter == 1 %}🥇 
+                                    {% elif forloop.counter == 2 %}🥈 
+                                    {% elif forloop.counter == 3 %}🥉 
+                                    {% else %}<strong>{{ forloop.counter }}º</strong>{% endif %}
+                                </td>
+                                <td class="text-start">
+                                    <strong>{{ analista.nome }}</strong>
+                                </td>
+                                
+                                <td class="fw-bold 
+                                    {% if analista.total_arrecadado >= analista.meta_individual_atual.valor_ouro %}table-ouro
+                                    {% elif analista.total_arrecadado >= analista.meta_individual_atual.valor_prata %}table-prata
+                                    {% elif analista.total_arrecadado >= analista.meta_individual_atual.valor_bronze %}table-bronze
+                                    {% endif %}">
+                                    
+                                    R$ {{ analista.total_arrecadado|floatformat:2 }}
+
+                                    {% if analista.total_arrecadado >= analista.meta_individual_atual.valor_ouro %}
+                                        <span class="meta-text" style="color: #534500;">👑 OURO BATIDO!</span>
+                                    {% elif analista.total_arrecadado >= analista.meta_individual_atual.valor_prata %}
+                                        <span class="meta-text text-secondary">🥈 PRATA BATIDA!</span>
+                                    {% elif analista.total_arrecadado >= analista.meta_individual_atual.valor_bronze %}
+                                        <span class="meta-text" style="color: #3e2711;">🥉 BRONZE BATIDO!</span>
+                                    {% endif %}
+                                </td>
+
+                                <td style="color: #cd7f32;" class="small">R$ {{ analista.falta_bronze|floatformat:2 }}</td>
+                                <td style="color: #8e8e8e;" class="small">R$ {{ analista.falta_prata|floatformat:2 }}</td>
+                                <td style="color: #d4af37;" class="small">R$ {{ analista.falta_ouro|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted">Nenhum analista vinculado a esta empresa.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-
-        <h5 class="text-secondary border-bottom pb-2">🏆 Performance Individual (Top 5)</h5>
-        <div class="table-responsive">
-            <table class="table table-sm table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Pos.</th>
-                        <th>Analista</th>
-                        <th>Total Arrecadado</th>
-                        <th class="text-danger">Falta Bronze</th>
-                        <th class="text-warning">Falta Prata</th>
-                        <th class="text-success">Falta Ouro</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for analista in item.ranking %}
-                    <tr>
-                        <td><strong>{{ forloop.counter }}º</strong></td>
-                        <td>{{ analista.nome }}</td>
-                        <td>R$ {{ analista.total_mes|floatformat:2 }}</td>
-                        <td class="small text-danger">R$ {{ analista.falta_bronze|floatformat:2 }}</td>
-                        <td class="small text-warning">R$ {{ analista.falta_prata|floatformat:2 }}</td>
-                        <td class="small text-success">R$ {{ analista.falta_ouro|floatformat:2 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        {% endfor %}
     </div>
-</div>
 
-
-<h3 class="h5 mb-3">📋 Performance Geral dos Analistas</h3>
-<div class="table-responsive">
-    <table class="table table-sm table-hover align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>Pos.</th>
-                <th>Analista</th>
-                <th>Total Arrecadado</th>
-                <th class="text-danger">Falta Bronze</th>
-                <th class="text-warning">Falta Prata</th>
-                <th class="text-success">Falta Ouro</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for analista in item.analistas %}
-            <tr {% if forloop.counter <= 5 %}class="table-light"{% endif %}>
-                <td>
-                    {% if forloop.counter == 1 %}🥇 
-                    {% elif forloop.counter == 2 %}🥈 
-                    {% elif forloop.counter == 3 %}🥉 
-                    {% else %}{{ forloop.counter }}º{% endif %}
-                </td>
-                <td>
-                    <strong>{{ analista.nome }}</strong>
-                    {% if not analista.total_mes %}
-                        <span class="badge bg-secondary ms-1">Sem lançamentos</span>
-                    {% endif %}
-                </td>
-                <td>
-                    R$ {{ analista.total_mes|default:0|floatformat:2 }}
-                </td>
-                <td class="small text-danger">R$ {{ analista.falta_bronze|floatformat:2 }}</td>
-                <td class="small text-warning">R$ {{ analista.falta_prata|floatformat:2 }}</td>
-                <td class="small text-success">R$ {{ analista.falta_ouro|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="6" class="text-center">Nenhum analista cadastrado para esta empresa.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-{% endfor %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

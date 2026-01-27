@@ -5,5 +5,6 @@ from metas import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('dashboard/', views.dashboard_metas, name='dashboard_metas'),
+    path('dashboard/', views.dashboard_metas, name='dashboard'),
+    path('cadastro/', views.cadastro, name="cadastro"),
 ]

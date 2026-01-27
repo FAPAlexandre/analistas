@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from datetime import date, timedelta
 from decimal import Decimal
 
@@ -10,7 +10,7 @@ class Empresa(models.Model):
         return self.nome
 
 class NivelMeta(models.Model):
-    """Define as metas Bronze, Prata e Ouro para uma Empresa específica"""
+    """Metas Individuais (usadas para o cálculo de cada Analista)"""
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='metas', null=True)
     nome_periodo = models.CharField(max_length=50, help_text="Ex: Janeiro 2026", null=True)
     valor_bronze = models.DecimalField(max_digits=12, decimal_places=2)
@@ -18,79 +18,72 @@ class NivelMeta(models.Model):
     valor_ouro = models.DecimalField(max_digits=12, decimal_places=2)
 
     class Meta:
-        verbose_name = "Nível de Meta"
-        verbose_name_plural = "Níveis de Metas"
+        verbose_name = "Nível de Meta Individual"
+        verbose_name_plural = "Níveis de Metas Individuais"
 
     def __str__(self):
-        return f"Meta {self.empresa.nome} - {self.nome_periodo}"
+        return f"Meta Individual {self.empresa.nome} - {self.nome_periodo}"
 
 class Analista(models.Model):
-    
-    @classmethod
-    def get_ranking_por_empresa(cls, empresa_obj):
-        hoje = date.today()
-        # Filtramos apenas os analistas da empresa fornecida
-        return cls.objects.filter(empresa=empresa_obj).annotate(
-            total_mes=models.Sum(
-                'arrecadacoes__valor',
-                filter=models.Q(
-                    arrecadacoes__data__month=hoje.month,
-                    arrecadacoes__data__year=hoje.year
-                )
-            )
-        ).order_by('-total_mes')[:5]
-    
     nome = models.CharField(max_length=100)
-    # Atrela o analista a uma empresa
     empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT, related_name='analistas', null=True)
 
     def __str__(self):
         return f"{self.nome} ({self.empresa.nome})"
 
+    @classmethod
+    def get_ranking_por_empresa(cls, empresa_obj):
+        hoje = date.today()
+        return cls.objects.filter(empresa=empresa_obj).annotate(
+            total_mes=Sum(
+                'arrecadacoes__valor',
+                filter=Q(
+                    arrecadacoes__data__month=hoje.month,
+                    arrecadacoes__data__year=hoje.year
+                )
+            )
+        ).order_by('-total_mes')
+
     @property
-    def meta_atual(self):
-        """Busca a meta mais recente da empresa deste analista"""
+    def meta_individual_atual(self):
         return self.empresa.metas.last()
 
     @property
     def total_arrecadado(self):
         hoje = date.today()
-        return self.arrecadacoes.filter(
+        resultado = self.arrecadacoes.filter(
             data__month=hoje.month, 
             data__year=hoje.year
-        ).aggregate(Sum('valor'))['valor__sum'] or Decimal(0)
+        ).aggregate(total=Sum('valor'))['total']
+        return resultado or Decimal('0.00')
 
-    # Cálculos inteligentes: Agora eles buscam os valores da meta da EMPRESA do analista
     @property
     def falta_bronze(self):
-        meta = self.meta_atual
-        if not meta: return Decimal(0)
-        return max(Decimal(0), meta.valor_bronze - self.total_arrecadado)
+        meta = self.meta_individual_atual
+        return max(Decimal('0.00'), meta.valor_bronze - self.total_arrecadado) if meta else Decimal('0.00')
 
     @property
     def falta_prata(self):
-        meta = self.meta_atual
-        if not meta: return Decimal(0)
-        return max(Decimal(0), meta.valor_prata - self.total_arrecadado)
+        meta = self.meta_individual_atual
+        return max(Decimal('0.00'), meta.valor_prata - self.total_arrecadado) if meta else Decimal('0.00')
 
     @property
     def falta_ouro(self):
-        meta = self.meta_atual
-        if not meta: return Decimal(0)
-        return max(Decimal(0), meta.valor_ouro - self.total_arrecadado)
+        meta = self.meta_individual_atual
+        return max(Decimal('0.00'), meta.valor_ouro - self.total_arrecadado) if meta else Decimal('0.00')
 
 class ArrecadacaoDiaria(models.Model):
     analista = models.ForeignKey(Analista, on_delete=models.CASCADE, related_name='arrecadacoes')
     valor = models.DecimalField(max_digits=12, decimal_places=2)
     data = models.DateField(default=date.today)
 
+    class Meta:
+        verbose_name = "Arrecadação Diária"
+        verbose_name_plural = "Arrecadações Diárias"
+
     def __str__(self):
-        return f"{self.analista.nome} - {self.data}"
-    
-    
-    
-    #O MODELS PARA ADICIONAR OS VALORES DAS EMPRESAS
-    
+        return f"{self.analista.nome} - R$ {self.valor} ({self.data})"
+
 class MetaGlobalEmpresa(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='metas_globais')
     mes_referencia = models.IntegerField(default=date.today().month)
@@ -109,11 +102,12 @@ class MetaGlobalEmpresa(models.Model):
 
     @property
     def total_arrecadado_equipe(self):
-        return ArrecadacaoDiaria.objects.filter(
+        resultado = ArrecadacaoDiaria.objects.filter(
             analista__empresa=self.empresa,
             data__month=self.mes_referencia,
             data__year=self.ano_referencia
-        ).aggregate(Sum('valor'))['valor__sum'] or Decimal(0)
+        ).aggregate(total=Sum('valor'))['total']
+        return resultado or Decimal('0.00')
 
     @property
     def dias_uteis_restantes(self):
@@ -121,7 +115,9 @@ class MetaGlobalEmpresa(models.Model):
         if self.mes_referencia == 12:
             ultimo_dia = date(self.ano_referencia, 12, 31)
         else:
-            ultimo_dia = date(self.ano_referencia, self.mes_referencia + 1, 1) - timedelta(days=1)
+            # Garante que o cálculo do último dia do mês esteja correto
+            proximo_mes = self.mes_referencia + 1
+            ultimo_dia = date(self.ano_referencia, proximo_mes, 1) - timedelta(days=1)
         
         inicio_contagem = max(hoje, date(self.ano_referencia, self.mes_referencia, 1))
         dias_uteis = 0
@@ -132,35 +128,32 @@ class MetaGlobalEmpresa(models.Model):
             temp_data += timedelta(days=1)
         return dias_uteis
 
-    def calcular_ritmo_diario(self, valor_meta):
-        dias = self.dias_uteis_restantes
-        if dias <= 0: return Decimal(0)
-        falta = valor_meta - self.total_arrecadado_equipe
-        return max(Decimal(0), falta / dias)
-
-    # No seu models.py, dentro de MetaGlobalEmpresa:
-# Dentro da classe MetaGlobalEmpresa no models.py
-
     @property
     def falta_para_bronze(self): 
-        return max(Decimal(0), self.bronze_global - self.total_arrecadado_equipe)
+        return max(Decimal('0.00'), self.bronze_global - self.total_arrecadado_equipe)
 
     @property
     def falta_para_prata(self):
-        return max(Decimal(0), self.prata_global - self.total_arrecadado_equipe)
+        return max(Decimal('0.00'), self.prata_global - self.total_arrecadado_equipe)
 
     @property
     def falta_para_ouro(self):
-        return max(Decimal(0), self.ouro_global - self.total_arrecadado_equipe)
+        return max(Decimal('0.00'), self.ouro_global - self.total_arrecadado_equipe)
+
+    def calcular_ritmo(self, valor_meta):
+        dias = self.dias_uteis_restantes
+        if dias <= 0: return Decimal('0.00')
+        falta = valor_meta - self.total_arrecadado_equipe
+        return max(Decimal('0.00'), falta / Decimal(dias))
 
     @property
     def ritmo_diario_bronze(self): 
-        return self.calcular_ritmo_diario(self.bronze_global)
+        return self.calcular_ritmo(self.bronze_global)
 
     @property
     def ritmo_diario_prata(self):
-        return self.calcular_ritmo_diario(self.prata_global)
+        return self.calcular_ritmo(self.prata_global)
 
     @property
     def ritmo_diario_ouro(self): 
-        return self.calcular_ritmo_diario(self.ouro_global)
+        return self.calcular_ritmo(self.ouro_global)
