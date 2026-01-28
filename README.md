@@ -1,8 +1,3 @@
-Essa é uma excelente ideia. Um repositório com uma boa documentação (README) é o que diferencia um "amontoado de arquivos" de um projeto profissional.
-
-Aqui está um modelo completo de README.md que escrevi especificamente para a estrutura que construímos (Django + Metas + Bootstrap). Basta copiar e salvar como README.md na pasta raiz do seu projeto e dar git push.
-🚀 Sistema de Gestão de Metas e Performance
-
 Um dashboard dinâmico desenvolvido em Django para monitoramento em tempo real da performance de arrecadação de analistas e empresas. O sistema calcula automaticamente o ritmo necessário para atingir metas globais (Bronze, Prata e Ouro) com base nos dias úteis restantes.
 ✨ Funcionalidades
 
