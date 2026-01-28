@@ -1,0 +1,16 @@
+# Arquivos de sistema e ambiente
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Banco de dados local (Importante ignorar para não sobrescrever dados no GitHub)
+db.sqlite3
+
+# Pastas de IDE
+.vscode/
+.idea/
+
+# Arquivos de mídia e estáticos coletados
+/static/
+/media/
