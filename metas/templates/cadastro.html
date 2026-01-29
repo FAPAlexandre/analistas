@@ -1,45 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Painel Administrativo</title>
+    <style>
+        /* Melhora a aparência dos campos gerados pelo Django */
+        input, select, textarea {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body class="bg-light">
     <div class="container py-5">
-        <h2 class="mb-4 text-center">⚙️ Cadastro do Sistema</h2>
+        
+        {% if messages %}
+            <div class="row justify-content-center">
+                <div class="col-md-12">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                            {% if message.tags == 'success' %} ✅ {% else %} ⚠️ {% endif %}
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <h2 class="mb-5 text-center fw-bold">⚙️ Cadastro do Sistema</h2>
         
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5>Nova Empresa</h5>
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-dark text-white text-center py-3">
+                        <h5 class="mb-0">🏢 Nova Empresa</h5>
+                    </div>
+                    <div class="card-body p-4">
                         <form method="POST"> {% csrf_token %}
                             {{ form_empresa.as_p }}
-                            <button type="submit" name="btn_empresa" class="btn btn-dark w-100">Cadastrar Empresa</button>
+                            <button type="submit" name="btn_empresa" class="btn btn-dark w-100 mt-2">Cadastrar Empresa</button>
                         </form>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5>Novo Analista</h5>
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-primary text-white text-center py-3">
+                        <h5 class="mb-0">👨‍💻 Novo Analista</h5>
+                    </div>
+                    <div class="card-body p-4">
                         <form method="POST"> {% csrf_token %}
                             {{ form_analista.as_p }}
-                            <button type="submit" name="btn_analista" class="btn btn-primary w-100">Cadastrar Analista</button>
+                            <button type="submit" name="btn_analista" class="btn btn-primary w-100 mt-2">Cadastrar Analista</button>
                         </form>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5>Lançar Arrecadação</h5>
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-header bg-success text-white text-center py-3">
+                        <h5 class="mb-0">💰 Lançar Arrecadação</h5>
+                    </div>
+                    <div class="card-body p-4">
                         <form method="POST"> {% csrf_token %}
                             {{ form_arrecadacao.as_p }}
-                            <button type="submit" name="btn_arrecadacao" class="btn btn-success w-100">Lançar Valor</button>
+                            <button type="submit" name="btn_arrecadacao" class="btn btn-success w-100 mt-2">Lançar Valor</button>
                         </form>
                     </div>
                 </div>
@@ -47,8 +88,12 @@
         </div>
         
         <div class="text-center mt-5">
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Ver Dashboard →</a>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary px-5 py-2">
+                🏠 Voltar ao Dashboard
+            </a>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

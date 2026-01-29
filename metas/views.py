@@ -1,17 +1,18 @@
 from django.shortcuts import render, redirect
 from django.db.models import Sum, Q
 from datetime import date
+from django.contrib.auth.decorators import login_required # Para segurança
+from django.contrib import messages # Para alertas de sucesso
 from .models import Empresa, Analista, MetaGlobalEmpresa
 from .forms import EmpresaForm, AnalistaForm, ArrecadacaoForm
 
 def dashboard_metas(request):
-    """View principal do Dashboard"""
+    """View pública do Dashboard"""
     empresas = Empresa.objects.all()
     dados_dashboard = []
     hoje = date.today()
 
     for empresa in empresas:
-        # Busca analistas com a soma de arrecadação do mês atual
         todos_analistas = Analista.objects.filter(empresa=empresa).annotate(
             total_mes=Sum(
                 'arrecadacoes__valor',
@@ -36,26 +37,27 @@ def dashboard_metas(request):
 
     return render(request, 'metas/dashboard.html', {'dados': dados_dashboard})
 
+@login_required # Só quem estiver logado acessa a página de cadastro
 def cadastro(request):
-    """View de cadastro (Antiga painel_cadastro)"""
-    # Se o formulário for enviado (POST)
+    """View de cadastro protegida"""
     if request.method == 'POST':
-        if 'btn_empresa' in request.POST:
-            form = EmpresaForm(request.POST)
-            if form.is_valid(): form.save()
-            
-        elif 'btn_analista' in request.POST:
-            form = AnalistaForm(request.POST)
-            if form.is_valid(): form.save()
-            
-        elif 'btn_arrecadacao' in request.POST:
-            form = ArrecadacaoForm(request.POST)
-            if form.is_valid(): form.save()
-            
-        # O nome aqui deve ser o 'name' definido no seu urls.py
-        return redirect('cadastro') 
+        # Dicionário para mapear o botão ao formulário
+        form_map = {
+            'btn_empresa': EmpresaForm,
+            'btn_analista': AnalistaForm,
+            'btn_arrecadacao': ArrecadacaoForm
+        }
+        
+        for btn_name, FormClass in form_map.items():
+            if btn_name in request.POST:
+                form = FormClass(request.POST)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, f"Cadastro realizado com sucesso!")
+                    return redirect('cadastro')
+                else:
+                    messages.error(request, "Erro ao validar o formulário. Verifique os dados.")
 
-    # Se for apenas acesso visual (GET)
     context = {
         'form_empresa': EmpresaForm(),
         'form_analista': AnalistaForm(),

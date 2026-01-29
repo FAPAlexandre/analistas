@@ -18,8 +18,8 @@ class NivelMeta(models.Model):
     valor_ouro = models.DecimalField(max_digits=12, decimal_places=2)
 
     class Meta:
-        verbose_name = "Nível de Meta Individual"
-        verbose_name_plural = "Níveis de Metas Individuais"
+        verbose_name = "Nível de Meta Analista"
+        verbose_name_plural = "Níveis de Metas Analistas"
 
     def __str__(self):
         return f"Meta Individual {self.empresa.nome} - {self.nome_periodo}"
