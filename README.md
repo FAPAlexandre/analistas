@@ -1,82 +1,90 @@
-Um dashboard dinâmico desenvolvido em Django para monitoramento em tempo real da performance de arrecadação de analistas e empresas. O sistema calcula automaticamente o ritmo necessário para atingir metas globais (Bronze, Prata e Ouro) com base nos dias úteis restantes.
-✨ Funcionalidades
+🚀 Sistema de Gestão de Arrecadação e Metas
 
-    Dashboard de Performance: Visualização clara do total arrecadado pela equipe e individualmente.
+Este aplicativo é uma plataforma de Business Intelligence (BI) e Gestão Operacional voltada para o monitoramento de performance de equipes de arrecadação em tempo real.
+📌 Arquitetura do Sistema
 
-    Cálculo Automático de Ritmo: O sistema indica quanto a equipe precisa arrecadar por dia para atingir cada nível de meta.
+O sistema está dividido em três pilares principais para garantir que cada perfil de usuário (Analista, Gerente e Diretor) tenha as informações necessárias sem poluição visual.
+1. Dashboard Operacional (/dashboard/)
 
-    Gamificação por Metais: Cores dinâmicas (Bronze, Prata, Ouro) que mudam conforme a meta é batida.
+O "Placar do Jogo". Focado no dia a dia da operação.
 
-    Gestão Dinâmica: Painel de cadastro para Empresas, Analistas e Arrecadações.
+    Ranking em Tempo Real: Lista analistas por volume arrecadado no mês.
 
-    Inteligência de Datas: Cálculo automático de dias úteis restantes no mês atual.
+    Status de Metas (Bronze/Prata/Ouro): Indicadores visuais que mudam de cor conforme o atingimento.
+
+    Cálculo de Ritmo: Informa quanto a equipe precisa arrecadar por dia para bater as próximas metas.
+
+    Atualização Automática: Auto-refresh a cada 60 segundos.
+
+2. Inteligência de Performance (/analise/)
+
+Visão estratégica baseada em tendências temporais.
+
+    Gráfico de Evolução Mensal: Gráfico de barras empilhadas mostrando os dias 1 a 31 do mês.
+
+    Segmentação por Analista: Cada cor no gráfico representa um analista, permitindo ver a contribuição individual no volume total diário.
+
+    Interface Interativa: Gráficos responsivos (Chart.js) com scroll horizontal para visualização detalhada.
+
+3. Relatórios de Fechamento (/relatorios/)
+
+Visão gerencial para tomada de decisão e auditoria.
+
+    Consolidado Mensal: Tabela de fechamento com a produção total de cada analista no mês corrente.
+
+    Acumulado Anual: Monitoramento de longo prazo para identificar os melhores talentos do ano.
+
+    Modo de Impressão: CSS otimizado para geração de PDFs e relatórios físicos em reuniões.
 
 🛠️ Tecnologias Utilizadas
 
-    Backend: Python 3.x & Django Framework.
+    Backend: Python 3.x / Django (Framework)
 
-    Frontend: HTML5, CSS3, Bootstrap 5.
+    Banco de Dados: SQLite (Desenvolvimento) / PostgreSQL (Recomendado para Produção)
 
-    Banco de Dados: SQLite (padrão de desenvolvimento).
+    Frontend: Bootstrap 5 (Styling) / Chart.js (Gráficos)
 
-    Localização: Padrão monetário brasileiro (pt-br).
+    Lógica de Negócio:
 
-📂 Estrutura do Projeto
-Plaintext
+        Sum e Q objects para agregações complexas.
 
-analistas/
-├── core/                # Configurações principais do Django
-├── metas/               # App principal do sistema
-│   ├── forms.py         # Formulários de entrada de dados
-│   ├── models.py        # Modelagem de dados (Empresa, Analista, Arrecadação)
-│   ├── views.py         # Lógica de negócio e cálculos de metas
-│   └── templates/       # Arquivos HTML (Dashboard e Cadastro)
-└── manage.py            # Utilitário de execução do Django
+        ExtractWeekDay e calendar para inteligência temporal.
 
-🚀 Como Executar o Projeto
+🗄️ Estrutura de Modelos (Models)
 
-    Clone o repositório:
-    Bash
+    Empresa: Entidade pai que agrupa analistas e metas.
 
-    git clone https://github.com/FAPAlexandre/analistas.git
-    cd analistas
+    Analista: Usuário operacional vinculado a uma empresa.
 
-    Crie e ative um ambiente virtual (Opcional, mas recomendado):
-    Bash
+    MetaGlobalEmpresa: Define os gatilhos (R$) para os níveis Bronze, Prata e Ouro de cada mês.
 
-    python -m venv venv
-    source venv/bin/activate  # No Linux
-    # venv\Scripts\activate   # No Windows
+    ArrecadacaoDiaria: Registro individual de cada entrada financeira (Data, Analista, Valor).
 
-    Instale o Django:
-    Bash
+🚀 Como Executar
 
-    pip install django
-
-    Execute as migrações do banco de dados:
+    Migrar o Banco:
     Bash
 
     python manage.py migrate
 
-    Inicie o servidor:
+    Criar Superusuário (Admin):
+    Bash
+
+    python manage.py createsuperuser
+
+    Rodar o Servidor:
     Bash
 
     python manage.py runserver
 
-    Acesse no navegador:
+🔒 Segurança e Acessos
 
-        Dashboard: http://127.0.0.1:8000/
+    Público: Apenas o Dashboard (opcional, dependendo da configuração da View).
 
-        Cadastro: http://127.0.0.1:8000/cadastro/
+    Restrito (@login_required):
 
-📈 Lógica de Cálculo de Metas
+        Cadastro: Registro de novos analistas e lançamentos.
 
-O sistema utiliza os seguintes cálculos em tempo real:
+        Análise: Acesso aos gráficos de performance.
 
-    Ritmo Diário: (Valor da Meta - Total Arrecadado) / Dias Úteis Restantes.
-
-    Status da Equipe: Definido pela soma total de todos os analistas vinculados à empresa no mês vigente.
-
-🤝 Contato
-
-Desenvolvido por Alexandre - [Seu LinkedIn aqui]
+        Relatórios: Acesso aos dados consolidados e financeiros.
