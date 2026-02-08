@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios de Fechamento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none; }
+            .card { border: none !important; box-shadow: none !important; }
+            body { background-color: white !important; }
+        }
+        .header-relatorio {
+            border-left: 5px solid #0d6efd;
+            padding-left: 15px;
+        }
+        .table-resumo td { vertical-align: middle; }
+        .bg-total { background-color: #f8f9fa; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-light">
+
+    <div class="container py-5">
+        <div class="d-flex justify-content-between align-items-center mb-5 no-print">
+            <div>
+                <h1 class="fw-bold mb-0">📄 Relatórios de Fechamento</h1>
+                <p class="text-muted">Consolidado Mensal e Acumulado Anual</p>
+            </div>
+            <div class="btn-group shadow-sm">
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">🏠 Dashboard</a>
+                <a href="{% url 'analise_performance' %}" class="btn btn-outline-info">📊 Gráficos</a>
+                <button onclick="window.print()" class="btn btn-dark">🖨️ Imprimir PDF</button>
+            </div>
+        </div>
+
+        {% for item in dados %}
+        <div class="card shadow-sm mb-5 border-0 overflow-hidden">
+            <div class="card-header bg-dark text-white py-3">
+                <h3 class="mb-0 h4">🏢 {{ item.empresa.nome }}</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    
+                    <div class="col-lg-6">
+                        <div class="header-relatorio mb-3">
+                            <h4 class="h5 mb-1 text-primary">Fechamento Mensal</h4>
+                            <small class="text-muted">Referência: {{ mes_atual_nome }} / {{ ano_atual }}</small>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover border">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Analista</th>
+                                        <th class="text-end">Total Arrecadado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for analista in item.ranking_mensal %}
+                                    <tr>
+                                        <td>{{ analista.nome }}</td>
+                                        <td class="text-end fw-bold">R$ {{ analista.total|default:0|floatformat:2 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="2" class="text-center text-muted">Sem dados no mês.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-total">
+                                        <td>TOTAL MENSAL</td>
+                                        <td class="text-end text-primary h5 mb-0">R$ {{ item.total_empresa_mes|floatformat:2 }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="header-relatorio mb-3" style="border-color: #ffc107;">
+                            <h4 class="h5 mb-1 text-warning">Acumulado Anual</h4>
+                            <small class="text-muted">Janeiro a Dezembro de {{ ano_atual }}</small>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover border">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Analista</th>
+                                        <th class="text-end">Total Acumulado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for analista in item.ranking_anual %}
+                                    <tr>
+                                        <td>{{ analista.nome }}</td>
+                                        <td class="text-end fw-bold">R$ {{ analista.total|default:0|floatformat:2 }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="2" class="text-center text-muted">Sem dados no ano.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-total">
+                                        <td>TOTAL ANUAL</td>
+                                        <td class="text-end text-danger h5 mb-0">R$ {{ item.total_empresa_ano|floatformat:2 }}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card-footer bg-white py-3 text-center text-muted small">
+                Relatório gerado em {% now "d/m/Y H:i" %} - Sistema de Gestão de Metas
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
