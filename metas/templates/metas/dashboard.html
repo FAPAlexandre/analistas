@@ -79,16 +79,21 @@
                 <h5 class="text-secondary border-bottom pb-2 mb-3 fw-bold">📊 Performance da Equipe</h5>
                 
                 <div class="row g-3 text-center mb-5">
-                    
                     <div class="col-md-3">
                         <div class="p-3 border-0 rounded-4 shadow h-100 
-                            {% if item.meta_global.total_arrecadado_equipe >= item.meta_global.ouro_global %} bg-ouro
-                            {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.prata_global %} bg-prata
-                            {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.bronze_global %} bg-bronze
+                            {% if item.meta_global.total_arrecadado_equipe >= item.meta_global.ouro_global and item.meta_global.ouro_global > 0 %} bg-ouro
+                            {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.prata_global and item.meta_global.prata_global > 0 %} bg-prata
+                            {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.bronze_global and item.meta_global.bronze_global > 0 %} bg-bronze
                             {% else %} bg-primary text-white {% endif %}">
-                            <small class="opacity-75 fw-bold text-uppercase">Total Arrecadado</small><br>
+                            <small class="opacity-75 fw-bold text-uppercase">Total Arrecadado Equipe</small><br>
                             <span class="h4 fw-bold">R$ {{ item.meta_global.total_arrecadado_equipe|floatformat:2 }}</span><br>
-                            <small class="fw-bold d-block mt-1">🚀 Em busca da meta</small>
+                            
+                            <small class="fw-bold d-block mt-1">
+                                {% if item.meta_global.total_arrecadado_equipe >= item.meta_global.ouro_global and item.meta_global.ouro_global > 0 %} 🏆 EQUIPE OURO!
+                                {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.prata_global and item.meta_global.prata_global > 0 %} 🥈 EQUIPE PRATA!
+                                {% elif item.meta_global.total_arrecadado_equipe >= item.meta_global.bronze_global and item.meta_global.bronze_global > 0 %} 🥉 EQUIPE BRONZE!
+                                {% else %} 🚀 EM BUSCA DA META {% endif %}
+                            </small>
                         </div>
                     </div>
 
@@ -96,14 +101,10 @@
                         <div class="p-3 border-0 rounded-4 shadow h-100 bg-bronze-viva text-white">
                             <small class="fw-bold text-uppercase">🥉 Meta Bronze: R$ {{ item.meta_global.bronze_global|floatformat:2 }}</small>
                             <hr class="my-2 border-white opacity-25">
-                            <small class="d-block mb-1 opacity-75">Falta para atingir:</small>
-                            <span class="h5 fw-bold">R$ {{ item.meta_global.falta_bronze_global|floatformat:2 }}</span>
-                            
-                            <div class="mt-2 py-2 px-2 rounded bg-white bg-opacity-25">
-                                <small class="fw-bold d-block">
-                                    🎯 Necessário: R$ {{ item.meta_global.diario_bronze|floatformat:2 }} / dia
-                                </small>
-                            </div>
+                            <span class="h5 fw-bold">
+                                {% if item.meta_global.total_arrecadado_equipe >= item.meta_global.bronze_global %} ✅ ATINGIDA!
+                                {% else %} Falta: R$ {{ item.meta_global.falta_bronze_global|floatformat:2 }}{% endif %}
+                            </span>
                         </div>
                     </div>
 
@@ -111,14 +112,10 @@
                         <div class="p-3 border-0 rounded-4 shadow h-100 bg-prata-viva text-white">
                             <small class="fw-bold text-uppercase">🥈 Meta Prata: R$ {{ item.meta_global.prata_global|floatformat:2 }}</small>
                             <hr class="my-2 border-white opacity-25">
-                            <small class="d-block mb-1 opacity-75">Falta para atingir:</small>
-                            <span class="h5 fw-bold">R$ {{ item.meta_global.falta_prata_global|floatformat:2 }}</span>
-                            
-                            <div class="mt-2 py-2 px-2 rounded bg-white bg-opacity-25">
-                                <small class="fw-bold d-block">
-                                    🎯 Necessário: R$ {{ item.meta_global.diario_prata|floatformat:2 }} / dia
-                                </small>
-                            </div>
+                            <span class="h5 fw-bold">
+                                {% if item.meta_global.total_arrecadado_equipe >= item.meta_global.prata_global %} ✅ ATINGIDA!
+                                {% else %} Falta: R$ {{ item.meta_global.falta_prata_global|floatformat:2 }}{% endif %}
+                            </span>
                         </div>
                     </div>
 
@@ -126,14 +123,10 @@
                         <div class="p-3 border-0 rounded-4 shadow h-100 bg-ouro-viva text-white">
                             <small class="fw-bold text-uppercase">🏆 Meta Ouro: R$ {{ item.meta_global.ouro_global|floatformat:2 }}</small>
                             <hr class="my-2 border-white opacity-25">
-                            <small class="d-block mb-1 opacity-75">Falta para atingir:</small>
-                            <span class="h5 fw-bold">R$ {{ item.meta_global.falta_ouro_global|floatformat:2 }}</span>
-                            
-                            <div class="mt-2 py-2 px-2 rounded bg-white bg-opacity-25">
-                                <small class="fw-bold d-block">
-                                    🎯 Necessário: R$ {{ item.meta_global.diario_ouro|floatformat:2 }} / dia
-                                </small>
-                            </div>
+                            <span class="h5 fw-bold">
+                                {% if item.meta_global.total_arrecadado_equipe >= item.meta_global.ouro_global %} ✅ ATINGIDA!
+                                {% else %} Falta: R$ {{ item.meta_global.falta_ouro_global|floatformat:2 }}{% endif %}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -161,31 +154,50 @@
                                 </td>
                                 <td class="text-start">
                                     <div class="analista-pill 
-                                        {% if analista.falta_ouro <= 0 %} bg-ouro
-                                        {% elif analista.falta_prata <= 0 %} bg-prata
-                                        {% elif analista.falta_bronze <= 0 %} bg-bronze
+                                        {% if analista.total_mes >= analista.meta_ouro_ref and analista.meta_ouro_ref > 0 %} bg-ouro
+                                        {% elif analista.total_mes >= analista.meta_prata_ref and analista.meta_prata_ref > 0 %} bg-prata
+                                        {% elif analista.total_mes >= analista.meta_bronze_ref and analista.meta_bronze_ref > 0 %} bg-bronze
                                         {% else %} bg-white text-dark border {% endif %}">
-                                        <span>{% if analista.falta_ouro <= 0 %}🏆{% elif analista.falta_prata <= 0 %}🥈{% elif analista.falta_bronze <= 0 %}🥉{% else %}👤{% endif %}</span>
+                                        <span>
+                                            {% if analista.total_mes >= analista.meta_ouro_ref and analista.meta_ouro_ref > 0 %}🏆
+                                            {% elif analista.total_mes >= analista.meta_prata_ref and analista.meta_prata_ref > 0 %}🥈
+                                            {% elif analista.total_mes >= analista.meta_bronze_ref and analista.meta_bronze_ref > 0 %}🥉
+                                            {% else %}👤{% endif %}
+                                        </span>
                                         <span>{{ analista.nome }}</span>
                                     </div>
                                     <div class="ps-3 mt-1">
-                                        {% if analista.falta_ouro <= 0 %}<span class="status-texto text-warning">✨ Bateu Ouro!</span>
-                                        {% elif analista.falta_prata <= 0 %}<span class="status-texto text-secondary">⭐ Bateu Prata!</span>
-                                        {% elif analista.falta_bronze <= 0 %}<span class="status-texto" style="color: #cd7f32;">🔸 Bateu Bronze!</span>
-                                        {% else %}<span class="status-texto text-muted">Em busca da meta</span>{% endif %}
+                                        {% if analista.total_mes >= analista.meta_ouro_ref and analista.meta_ouro_ref > 0 %}
+                                            <span class="status-texto text-warning">✨ Bateu Ouro!</span>
+                                        {% elif analista.total_mes >= analista.meta_prata_ref and analista.meta_prata_ref > 0 %}
+                                            <span class="status-texto text-secondary">⭐ Bateu Prata!</span>
+                                        {% elif analista.total_mes >= analista.meta_bronze_ref and analista.meta_bronze_ref > 0 %}
+                                            <span class="status-texto" style="color: #cd7f32;">🔸 Bateu Bronze!</span>
+                                        {% else %}
+                                            <span class="status-texto text-muted">🚀 Em busca da meta</span>
+                                        {% endif %}
                                     </div>
                                 </td>
                                 <td>
-                                    {% if analista.falta_bronze > 0 %}<span class="badge bg-light text-dark border badge-meta">Falta R$ {{ analista.falta_bronze|floatformat:2 }}</span>
-                                    {% else %}<div class="h5 mb-0 text-success fw-bold">BATIDA 🥉</div>{% endif %}
+                                    {% if analista.total_mes < analista.meta_bronze_ref %}
+                                        <span class="badge bg-light text-dark border badge-meta">Falta R$ {{ analista.falta_bronze|floatformat:2 }}</span>
+                                    {% else %}
+                                        <div class="h5 mb-0 text-success fw-bold">BATIDA 🥉</div>
+                                    {% endif %}
                                 </td>
                                 <td>
-                                    {% if analista.falta_prata > 0 %}<span class="badge bg-light text-dark border badge-meta">Falta R$ {{ analista.falta_prata|floatformat:2 }}</span>
-                                    {% else %}<div class="h5 mb-0 text-success fw-bold">BATIDA 🥈</div>{% endif %}
+                                    {% if analista.total_mes < analista.meta_prata_ref %}
+                                        <span class="badge bg-light text-dark border badge-meta">Falta R$ {{ analista.falta_prata|floatformat:2 }}</span>
+                                    {% else %}
+                                        <div class="h5 mb-0 text-success fw-bold">BATIDA 🥈</div>
+                                    {% endif %}
                                 </td>
                                 <td>
-                                    {% if analista.falta_ouro > 0 %}<span class="badge bg-light text-dark border badge-meta">Falta R$ {{ analista.falta_ouro|floatformat:2 }}</span>
-                                    {% else %}<div class="h5 mb-0 text-success fw-bold">BATIDA 🏆</div>{% endif %}
+                                    {% if analista.total_mes < analista.meta_ouro_ref %}
+                                        <span class="badge bg-light text-dark border badge-meta">Falta R$ {{ analista.falta_ouro|floatformat:2 }}</span>
+                                    {% else %}
+                                        <div class="h5 mb-0 text-success fw-bold">BATIDA 🏆</div>
+                                    {% endif %}
                                 </td>
                                 <td class="text-end px-4">
                                     <span class="h5 mb-0 fw-bold text-primary">R$ {{ analista.total_mes|default:0|floatformat:2 }}</span>
